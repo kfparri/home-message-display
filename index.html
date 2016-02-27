@@ -21,15 +21,20 @@
         <script src="/socket.io/socket.io.js"></script>
         <script src="http://code.jquery.com/jquery-1.11.1.js"></script>
         <script>
+            // this is not the best way to do this, it should
+            //  be in it's own file...
             var socket = io();
             
+            // when the form is submitted, emit a 'chat message'
             $('form').submit(function(){
                 socket.emit('chat message', $('#m').val());
                 $('#m').val('');
                 return false;
             });
             
+            // fire this event when the 'chat meesage' is received
             socket.on('chat message', function(msg){
+                // if the text is <CLEAR>, clear the message window
                 if(msg == '<CLEAR>')
                 {
                     $('#messages').html('');
