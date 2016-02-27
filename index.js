@@ -22,6 +22,11 @@ var io = require('socket.io')(http);
 app.get('/', function(req, res){
     // instead of serving html from a string here, load
     //  up an html file from the root directory
+    res.sendFile(__dirname + '/client.html');
+});
+
+app.get('/server', function(req, res){
+    // send out the index.html file which will act as the server
     res.sendFile(__dirname + '/index.html');
 });
 
