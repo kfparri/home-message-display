@@ -18,16 +18,21 @@ var app = require('express')();
 var http = require('http').Server(app);
 var io = require('socket.io')(http);
 
+var counter = 0;
+var history = new Array();
+
 // default get method
 app.get('/', function(req, res){
     // instead of serving html from a string here, load
     //  up an html file from the root directory
     res.sendFile(__dirname + '/client.html');
+    console.log('connecting a client');
 });
 
 app.get('/server', function(req, res){
     // send out the index.html file which will act as the server
     res.sendFile(__dirname + '/index.html');
+    console.log('connecting a server');
 });
 
 // socket.io connection event.  This fires when a client connects
@@ -35,11 +40,25 @@ io.on('connection', function(socket){
     // log the user connect
     console.log('a user has connected');
     
+    // this is the first time this user has shown up, load the history.
+    history.forEach(function(item){
+        socket.emit('chat message', item);    
+    });
+    
+    //socket.emit('chat message', { msg: 'welcome!', size: 'normal' });
+    
     // whenever a 'chat message' is received, emit it to 
     //  all connected clients
     socket.on('chat message', function(msg){
         // emit the message back to the clients to display on 
         //  the page.
+        if(msg.msg == '/clear')
+        {
+            history = new Array();
+        }
+        {
+            history.push(msg);
+        }
         io.emit('chat message', msg);
     });
     
@@ -50,8 +69,19 @@ io.on('connection', function(socket){
     });
 });
 
+console.log('starting the time send');
+
+// Send a packet every second with the current date and time, to let users know the page is loading
+setInterval(function() {
+     tmp = new Date();
+    //console.log('updating the time with: ' + tmp);
+    
+    io.emit('timer', tmp);
+}, 1000);
+    
 // start the http server on port 3000
 http.listen(3000, function(){
     console.log('listening on *:3000');
 });
+
 

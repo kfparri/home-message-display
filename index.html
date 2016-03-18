@@ -5,6 +5,9 @@
         <style>
             * { margin: 0; padding: 0; box-sizing: border-box; }
             body { font: 13px Helvetica, Arial; }
+            .header { background: #000; padding: 3px; width: 100%; color: white; text-align: center;}
+            .bigcenter {font-size: x-large; text-align: center;}
+            .time {float: left;}
             form { background: #000; padding: 3px; position: fixed; bottom: 0; width: 100%; }
             form input { border: 0; padding: 10px; width: 75%; margin-right: .5%; }
             form button { width: 9%; background: rgb(130, 224, 255); border: none; padding: 10px; }
@@ -15,6 +18,10 @@
         </style>
     </head>
     <body>
+        <div class='header'>
+            <span class='time'><span id="timer"></span></span>
+            <span class='bigcenter'>Message display board</span>
+        </div>
         <ul id="messages"></ul>
         <form action="">
             <input id="m" autocomplete="off" />
@@ -30,6 +37,12 @@
             // this is not the best way to do this, it should
             //  be in it's own file...
             var socket = io();
+            
+            socket.on('timer', function(data){
+                var tmp = getDateString(data);
+                $('#timer').html(tmp);
+            });
+            
             $('#m').focus();
             
             // when the form is submitted, emit a 'chat message'
@@ -47,17 +60,8 @@
                 
                 // get the current date to put on the message:
                 var currentDate = new Date();
-                var year = currentDate.getFullYear();
-                var month = currentDate.getMonth() + 1;
-                var day = currentDate.getDate();
-                var hour = currentDate.getHours();
-                var minute = currentDate.getMinutes();
                 
-                if(minute.toString().length == 1)
-                {
-                    minute = '0' + minute;
-                }
-                var datetime = month + '/' + day + '/' + year + ' ' + hour + ':' + minute;
+                var datetime = getDateString(currentDate);
                     
                 // if the text is <CLEAR>, clear the message window
                 if(msg == '/clear')
@@ -69,6 +73,29 @@
                     $('#messages').append($('<li class="' + size + '">').text(datetime + ": " + msg));
                 }
             });
+            
+            function getDateString(dateTime)
+            {
+                dateTime = new Date(dateTime);
+                var year = dateTime.getFullYear();
+                var month = dateTime.getMonth() + 1;
+                var day = dateTime.getDate();
+                var hour = dateTime.getHours();
+                var minute = dateTime.getMinutes();
+                var seconds = dateTime.getSeconds();
+                
+                if(minute.toString().length == 1)
+                {
+                    minute = '0' + minute;
+                }
+                
+                if(seconds.toString().length == 1)
+                {
+                    seconds = '0' + seconds;
+                }
+                
+                return month + '/' + day + '/' + year + ' ' + hour + ':' + minute + ':' + seconds; 
+            }
         </script>
     </body>
 </html>
